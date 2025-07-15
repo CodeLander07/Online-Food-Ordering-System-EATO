@@ -4,7 +4,7 @@ import "./global.css"
 export default function index() {
   return (
     <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-xl font-bold text-red-100">
+      <Text className="text-xl font-bold text-black">
         Welcome to My React Native App!
       </Text>
     </View>
