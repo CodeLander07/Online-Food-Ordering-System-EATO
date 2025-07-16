@@ -8,7 +8,11 @@ const CardButton = () => {
   return (
     
     <TouchableOpacity className='card-btn '>
-        <Image source={images.bag} className="size-5" resizeMode="contain" />
+        {images.bag ? (
+            <Image source={images.bag} style={{ width: 20, height: 20 }} resizeMode="contain" />
+        ) : (
+            <Text style={{ color: 'red' }}>Image not found</Text>
+        )}
         { totalItems > 0 && (
             <View className='cart-badge'>
                 <Text className='small-bold text-white'>
