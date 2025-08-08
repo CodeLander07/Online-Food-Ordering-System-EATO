@@ -1,18 +1,29 @@
-import { View, Text ,Button, Alert  } from 'react-native'
-import React from 'react'
-import CustomInput from '@/components/CustomInput'
 import CustomButton from '@/components/CustomButton'
-import { Link ,router } from 'expo-router'
-import { signIn } from '@/lib/appwrite'
+import CustomInput from '@/components/CustomInput'
+import { checkActiveSession, signIn } from '@/lib/appwrite'
+import { Link, router } from 'expo-router'
+import React, { useEffect, useState } from 'react'
+import { Alert, Text, View } from 'react-native'
 
 
 const SignIn = () => {
 
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [form , setFrom  ]  = React.useState({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form , setFrom  ]  = useState({
     email: '',
     password: ''
   });
+
+  // Check if user is already signed in
+  useEffect(() => {
+    const checkSession = async () => {
+      const hasActiveSession = await checkActiveSession();
+      if (hasActiveSession) {
+        router.replace('/');
+      }
+    };
+    checkSession();
+  }, []);
 
   const submit = async() =>{
     const { email, password } = form;
@@ -20,14 +31,30 @@ const SignIn = () => {
       setIsSubmitting(true);
       try {
         //appwrite sign in
-        await signIn({ email, password });
-
+        const session = await signIn({ email, password });
         
-        router.replace('/')
+        if (session) {
+          Alert.alert('Success', 'Signed in successfully!');
+          router.replace('/');
+        }
         
       }
       catch (error) {
-        Alert.alert('Error', 'Something went wrong');
+        console.error('SignIn Error:', error);
+        
+        // More specific error handling
+        if (error instanceof Error) {
+          if (error.message.includes('Invalid credentials')) {
+            Alert.alert('Error', 'Invalid email or password. Please try again.');
+          } else if (error.message.includes('session is active')) {
+            Alert.alert('Info', 'You are already signed in!');
+            router.replace('/');
+          } else {
+            Alert.alert('Error', 'Something went wrong. Please try again.');
+          }
+        } else {
+          Alert.alert('Error', 'An unexpected error occurred.');
+        }
       }
       finally {
         setIsSubmitting(false);
@@ -54,7 +81,7 @@ const SignIn = () => {
       
       />
       <CustomButton
-      title='sign-in'
+      title='Sign In'
       isLoading={isSubmitting}
       onPress={submit}
       />

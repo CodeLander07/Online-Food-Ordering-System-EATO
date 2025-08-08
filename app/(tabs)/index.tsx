@@ -1,9 +1,10 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FlatList, Image, Pressable,TouchableOpacity, Text, View } from "react-native";
+import {Button , FlatList, Image, Pressable,TouchableOpacity, Text, View } from "react-native";
 import { Fragment } from "react";
 import cn from "clsx";
 import { images, offers } from "@/constants";
 import CardButton from "@/components/CardButton";
+import * as Sentry from "@sentry/react-native";
 
 export default function index() {
   return (
@@ -66,6 +67,11 @@ export default function index() {
         </View>
         <CardButton/>
         </View>
+        )}
+        ListFooterComponent={() => (
+          <Button 
+          title='Try!' 
+          onPress={ () => { Sentry.captureException(new Error('First error')) }}/>
         )}
       />
     </SafeAreaView>

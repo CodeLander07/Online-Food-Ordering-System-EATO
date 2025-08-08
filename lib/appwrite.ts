@@ -1,7 +1,6 @@
 
 import { CreateUserPrams, SignInParams } from "@/type";
-import { Platform } from "react-native";
-import { Client, Account , Databases , Avatars, ID , Query} from "react-native-appwrite";
+import { Account, Avatars, Client, Databases, ID, Query } from "react-native-appwrite";
 
 export const appwriteConfig = {
     endpoint:process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT !,
@@ -44,12 +43,34 @@ export const createUser = async ({name,email,password}: CreateUserPrams) => {
 
 export const signIn = async ({email,password}:SignInParams) => {
     try {
+        // First, check if there's already an active session
+        try {
+            const currentSession = await account.get();
+            if (currentSession) {
+                // If there's already a session, delete it first
+                await account.deleteSession('current');
+            }
+        } catch (error) {
+            // If there's no session, this will throw an error, which is fine
+            console.log('No existing session found');
+        }
+
+        // Now create a new session
         const session = await account.createEmailPasswordSession(email, password);
         if(!session) throw new Error("Failed to create session");
         return session;
     }
     catch(e){
         throw new Error(`Error signing in: ${e}`);
+    }
+}
+
+export const signOut = async () => {
+    try {
+        const session = await account.deleteSession('current');
+        return session;
+    } catch (e) {
+        throw new Error(`Error signing out: ${e}`);
     }
 }
 
@@ -69,6 +90,15 @@ export const getCurrentUser = async () => {
         return currentUser.documents[0];
     } catch (e) {
         console.log(e);
-        throw new Error(e as string);
+        return null; // Return null instead of throwing error for better handling
+    }
+}
+
+export const checkActiveSession = async () => {
+    try {
+        const session = await account.get();
+        return session ? true : false;
+    } catch (error) {
+        return false;
     }
 }
