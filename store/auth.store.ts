@@ -7,38 +7,36 @@ type AuthState = {
     user : User | null;
     isLoading: boolean;
 
-    setIsAuthenticated: (isAuthenticated: boolean) => void;
+    setIsAuthenticated: (value: boolean) => void;
     setUser: (user: User | null) => void;
-    setIsLoading: (isLoading: boolean) => void;
+    setLoading: (loading: boolean) => void;
 
-    fetachAuthenitcatedUser: () => Promise<void>;
+    fetchAuthenticatedUser: () => Promise<void>;
 }
 
 const useAuthStore = create<AuthState>((set) => ({
-    isAuthenticated: false,
-    user: null,
-    isLoading: true,
+    isAuthenticated : false,
+    user:null,
+    isLoading: false,
 
-    setIsAuthenticated: (value) => set({ isAuthenticated:value  }),
-    setUser: (user) => set({ user }),
-    setIsLoading: (value) => set({ isLoading: value }),
-    fetachAuthenitcatedUser: async () => {
-        set({ isLoading: true });
-        try {
+    setIsAuthenticated :(value) => set({isAuthenticated:value}),
+    setUser :(user) => set({user}),
+    setLoading:(value) => set({isLoading:value}),
+
+    fetchAuthenticatedUser: async() =>{
+        set({isLoading :true});
+
+        try{
             const user = await getCurrentUser();
-            
-            if (user) {
-                set({isAuthenticated: true , user:user as User });
-            } else {
-                set({ user: null, isAuthenticated: false });
-            }
-
-
-        } catch (error) {
-            console.error('Error fetching authenticated user:', error);
+            if(user) set({ user: user as User, isAuthenticated: true });
+            else set({ user: null, isAuthenticated: false });
+        }
+        catch(e){
+            console.error('Error fetching authenticated user:', e);
             set({ user: null, isAuthenticated: false });
-        } finally {
-            set({ isLoading: false });
+        }
+        finally{
+            set({isLoading:false});
         }
     }
 }))
